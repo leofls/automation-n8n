@@ -1,0 +1,59 @@
+
+services:
+ 
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    ports:
+      - '127.0.0.1:5678:5678'
+    
+    environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=${DB_HOST}
+      - DB_POSTGRESDB_PORT=${DB_PORT}
+      - DB_POSTGRESDB_DATABASE=${DB_NAME}
+      - DB_POSTGRESDB_USER=${DB_USER}
+      - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ${DATA_FOLDER}/.n8n:/home/node/.n8n
+    depends_on:
+      initContainer:
+        condition: service_completed_successfully
+    networks:
+      - n8n-network
+
+  evolution_api:
+    image: atendai/evolution-api:latest
+    restart: always
+    container_name: evolution_api
+    ports:
+      - '5679:5679'
+    env_file:
+      - .env
+    volumes:
+      - evolution_store:/evolution/store
+      - evolution_instances:/evolution/instances
+    networks:
+      - n8n-network
+
+  pg:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_DB: n8n_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./docker/setup.sql:/docker-entrypoint-initdb.d/setup.sql
+      - ./docker/pgdata:/var/lib/postgresql/data
+    networks:
+      - n8n-network
+    
+
+networks:
+  n8n-network:
+    external: true
+
+volumes:
+  evolution_store: {}
+  evolution_instances: {}
