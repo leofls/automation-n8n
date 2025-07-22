@@ -6,8 +6,12 @@
 ## Instalação
 
 ```bash
-git clone https://github.com/seu-usuario/n8n.git
+git clone git@github.com:leofls/automation-n8n.git
 ```
+ou 
+```bash
+git clone https://github.com/leofls/automation-n8n.git
+```    
 
 ## Executando o Projeto
 
